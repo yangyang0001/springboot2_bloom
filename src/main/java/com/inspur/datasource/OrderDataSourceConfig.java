@@ -21,7 +21,7 @@ import javax.sql.DataSource;
  * @作者：Yang
  */
 @Configuration
-@MapperScan(basePackages = "com.inspur.bloom.mapper", sqlSessionTemplateRef = "OrderSqlSessionTemplate")
+@MapperScan(basePackages = {"com.inspur.bloom.mapper","com.inspur.product.mapper"}, sqlSessionTemplateRef = "OrderSqlSessionTemplate")
 public class OrderDataSourceConfig {
 
 	/**
