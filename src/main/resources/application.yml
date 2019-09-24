@@ -22,12 +22,16 @@ spring:
     active: test
   datasource:
     bloom:
-      jdbcUrl: jdbc:mysql://localhost:3306/bloom_test?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&autoReconnect=true&useSSL=false
+#      jdbcUrl: jdbc:mysql://localhost:3306/bloom_test?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&autoReconnect=true&useSSL=false
+      jdbcUrl: jdbc:mysql://localhost:3306/mysql_youhua?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&autoReconnect=true&useSSL=false
       username: root
       password: 123456
       driverClassName: com.mysql.cj.jdbc.Driver
   application:
     name: bloom
+  redis:
+    host: 192.168.120.157
+    port: 6379
 ###### adminUI-client 监控中心的配置项(作为被监控端的配置), 这里先注释掉####
 #  boot:
 #    admin:

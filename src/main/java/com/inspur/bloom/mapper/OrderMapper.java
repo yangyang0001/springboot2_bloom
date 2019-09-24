@@ -1,6 +1,7 @@
 package com.inspur.bloom.mapper;
 
 import com.inspur.bloom.entity.Order;
+import com.inspur.bloom.entity.User;
 import org.apache.ibatis.annotations.*;
 
 import java.util.List;
@@ -40,5 +41,10 @@ public interface OrderMapper {
 	})
 	@Select("select * from bloom_table b where b.order_num like CONCAT('%',#{order_num},'%')")
 	List<Order> getOrderListByOrderNumWithSQL(@Param("order_num") String orderNum);
+
+
+
+	@Insert("insert into user_innodb(name, gender, phone) values(#{name}, #{gender}, #{phone})")
+	public int insertUser(User user);
 
 }

@@ -4,7 +4,9 @@ import com.github.pagehelper.PageInfo;
 import com.google.common.hash.BloomFilter;
 import com.google.common.hash.Funnels;
 import com.inspur.bloom.entity.Order;
+import com.inspur.bloom.entity.User;
 import com.inspur.bloom.service.OrderService;
+import com.inspur.util.RandomValue;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,7 +15,9 @@ import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 
 import java.nio.charset.Charset;
+import java.security.SecureRandom;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 
@@ -44,6 +48,23 @@ public class OrderController {
             insertCount += orderService.insertOrder(order);
             log.info("InsertOrderCount -------------:" + insertCount);
 //        }
+        return Integer.valueOf(insertCount).toString();
+    }
+
+    @RequestMapping("/insertUser")
+    public String insertUser(){
+        int insertCount = 0;
+        RandomValue randomValue = new RandomValue();
+        Random random = new Random();
+        for(int i = 0; i < 100000; i++){
+            User user = new User();
+            user.setGender(random.nextBoolean());
+            user.setPhone(randomValue.getTel());
+            user.setName(randomValue.getChineseName());
+            insertCount = orderService.insertUser(user);
+            log.info("InsertUserCount -------------:" + insertCount);
+
+        }
         return Integer.valueOf(insertCount).toString();
     }
 

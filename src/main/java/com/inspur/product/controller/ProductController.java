@@ -6,12 +6,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Order: YANG
@@ -63,6 +66,9 @@ public class ProductController {
 	@Autowired
 	private RedissonClient redissonClient;
 
+	@Autowired
+	private StringRedisTemplate redisTemplate;
+
 	/**
 	 * 获取商品的具体信息!
 	 *
@@ -81,7 +87,7 @@ public class ProductController {
 	 * @return
 	 */
 	@RequestMapping("/killProduct")
-	public int killProduct(String productNo, String killNum) {
+	public int killProduct(@RequestParam("productNo") String productNo, @RequestParam("killNum") Integer killNum) {
 		Product product = new Product();
 		product.setProductNo(productNo);
 		product.setKillNum(Integer.valueOf(killNum));
@@ -97,7 +103,7 @@ public class ProductController {
 	 * @return
 	 */
 	@RequestMapping("/killProductWithVersion")
-	public int killProductWithVersion(String productNo, String killNum) {
+	public int killProductWithVersion(@RequestParam("productNo") String productNo, @RequestParam("killNum") Integer killNum) {
 		Product product = new Product();
 		product.setProductNo(productNo);
 		product.setKillNum(Integer.valueOf(killNum));
@@ -113,7 +119,7 @@ public class ProductController {
 	 * @return
 	 */
 	@RequestMapping("/killProductWithBeiGuanLock")
-	public int killProductWithBeiGuanLock(String productNo, String killNum) {
+	public int killProductWithBeiGuanLock(@RequestParam("productNo") String productNo, @RequestParam("killNum") Integer killNum) {
 		Product product = new Product();
 		product.setProductNo(productNo);
 		product.setKillNum(Integer.valueOf(killNum));
@@ -128,7 +134,7 @@ public class ProductController {
 	 * @return
 	 */
 	@RequestMapping("/killWithRedis")
-	public int killWithRedis(String productNo, String killNum) {
+	public int killWithRedis(@RequestParam("productNo") String productNo, @RequestParam("killNum") Integer killNum) {
 		int result = 0;
 		boolean lockFlag = true;
 		Jedis jedis = jedisPool.getResource();
@@ -165,7 +171,7 @@ public class ProductController {
 	 * @return
 	 */
 	@RequestMapping("/killWithRedisson")
-	public int killWithRedisson(String productNo, String killNum) {
+	public int killWithRedisson(@RequestParam("productNo") String productNo, @RequestParam("killNum") Integer killNum) {
 		RLock lock = redissonClient.getLock(productNo);
 		int result = 0;
 		try {
@@ -174,7 +180,7 @@ public class ProductController {
 				//TODO：真正的核心处理逻辑
 				Product product = new Product();
 				product.setProductNo(productNo);
-				product.setKillNum(Integer.valueOf(killNum));
+				product.setKillNum(killNum);
 				result = productService.minusProduct(product);
 			}
 		}catch (Exception e){
@@ -183,6 +189,38 @@ public class ProductController {
 		}finally {
 			if (lock!=null){
 				lock.unlock();
+			}
+		}
+		return result;
+	}
+
+	/**
+	 * 当前的分布式锁还是有问题的,因为30秒对于当前的业务来说未必能够执行完成或当前执行超过30s
+	 * 所以这里考虑一个守护线程 对 当前线程的分布式锁的 一个延迟续命的作用!
+	 * @return
+	 */
+	@RequestMapping("/killWithStringRedisTemplate")
+	public int killWithStringRedisTemplate(@RequestParam("productNo") String productNo,
+										   @RequestParam("killNum") Integer killNum) {
+		int result = 0;
+		String LOCK_NAME = productNo + "_DISTRIBUTION_LOCK";
+		String LOCK_VALUE = productNo + UUID.randomUUID().toString();
+		try {
+			//每次秒杀必须加锁
+			boolean lockFlag = redisTemplate.opsForValue().setIfAbsent(LOCK_NAME, LOCK_VALUE, 30, TimeUnit.SECONDS);
+			if(lockFlag) {
+				int leftNum = Integer.parseInt(redisTemplate.opsForValue().get(productNo));
+				if(leftNum >=0 && leftNum >= killNum) {
+					redisTemplate.opsForValue().set(productNo, String.valueOf(leftNum - killNum));
+					result = killNum;
+				}
+			}
+		} catch (Exception e) {
+		    e.printStackTrace();
+		} finally {
+			//执行完成这次锁,删除当前线程添加的分布式锁
+			if(LOCK_VALUE.equals(redisTemplate.opsForValue().get(LOCK_NAME))) {
+				redisTemplate.delete(productNo);
 			}
 		}
 		return result;

@@ -115,6 +115,11 @@
             <scope>true</scope>
         </dependency>
 
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+        </dependency>
+
         <!-- actuator 监控中心 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
