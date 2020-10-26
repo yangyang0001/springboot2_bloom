@@ -50,7 +50,7 @@ logging:
       apache:
         ibatis: debug
     com:
-      inspur:
+      deepblue:
         bloom:
           mapper: debug
         product:

@@ -8,7 +8,7 @@
         <version>2.1.3.RELEASE</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>com.inspur</groupId>
+    <groupId>com.deepblue</groupId>
     <artifactId>springboot2_bloom</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>springboot2_bloom</name>
