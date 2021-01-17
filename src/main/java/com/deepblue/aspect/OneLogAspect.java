@@ -1,6 +1,7 @@
 package com.deepblue.aspect;
 
 
+import com.alibaba.fastjson.JSON;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -30,7 +31,7 @@ public class OneLogAspect {
         }
 
         Object result = proceedingJoinPoint.proceed();
-        System.out.println("result  :" + result);
+        System.out.println("result  :" + JSON.toJSONString(result));
         /**
          * proceed  和 proceed(Object[] args) 二者执行之一就OK了
          */
