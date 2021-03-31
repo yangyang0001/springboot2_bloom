@@ -205,7 +205,7 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>27.0.1-jre</version>
+            <version>29.0-jre</version>
         </dependency>
 
         <!-- CountingBloomFilter 目前不能使用,因为不懂Hadoop中的东西,也没有时间和经历来研究,以后看大数据的东西的时候学习 -->
